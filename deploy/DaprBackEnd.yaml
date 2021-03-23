@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: daprbackend
+  labels:
+    app: daprbackend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: daprbackend
+  template:
+    metadata:
+      labels:
+        app: daprbackend
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "daprbackend"
+        dapr.io/app-port: "80"
+        dapr.io/config: "zipkin"
+    spec:
+      containers:
+      - name: daprbackend
+        image: daprbackend
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Never
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Development

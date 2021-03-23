@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: daprfrontend
+  labels:
+    app: daprfrontend
+spec:
+
+  replicas: 1
+  selector:
+    matchLabels:
+      app: daprfrontend
+  template:
+    metadata:
+      labels:
+        app: daprfrontend
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "daprfrontend"
+        dapr.io/app-port: "80"
+    spec:
+      volumes:
+      - name: aspnetcore-storage
+        persistentVolumeClaim:
+          claimName: pvc-aspnetcore
+      containers:
+      - name: daprfrontend
+        image: daprfrontend
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Never
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "500m"
+        volumeMounts:
+          - mountPath: "/root/.aspnet/DataProtection-Keys"
+            name: aspnetcore-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: daprfrontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: daprfrontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+
